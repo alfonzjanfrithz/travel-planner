@@ -1,0 +1,152 @@
+openapi: 3.0.0
+info:
+  title: travel-planner
+  version: 1.0.0
+  description: api to support various travel plan
+
+servers:
+  - url: 'http://api.travel-planner.com/v1'
+
+paths:
+  /trips:
+    get:
+      operationId: searchTrips
+      tags:
+        - Trips
+      description: retrieve all available trips in paginated way
+      responses:
+        200:
+          description: sucesfully retrieved all trips
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Trip'
+
+  /trips/{tripId}:
+    get:
+      operationId: getTrips
+      tags:
+        - Trips
+      description: retrieve a trip by id
+      parameters:
+        - name: tripId
+          in: path
+          schema:
+            type: integer
+            minimum: 1
+          required: true
+          allowEmptyValue: false
+          example: 1
+
+      responses:
+        200:
+          description: the specific trip succesfully retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Trip'
+          links:
+            GetRoutesByTripId:
+              $ref: '#/components/links/GetRoutesByTripId'
+
+
+  /trips/{tripId}/routes:
+    get:
+      operationId: searchRoutes
+      tags:
+        - Routes
+      description: retrieve all routes under a trip
+      parameters:
+        - name: tripId
+          in: path
+          schema:
+            type: integer
+            minimum: 1
+          required: true
+          allowEmptyValue: false
+          example: 1
+      responses:
+        200:
+          description: list of all routes in a trip
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Route'
+
+  /trips/{tripId}/routes/{routeId}:
+    get:
+      operationId: getRoutes
+      tags:
+        - Routes
+      description: retrieve specific route id
+      parameters:
+        - name: tripId
+          in: path
+          schema:
+            type: integer
+            minimum: 1
+          required: true
+          allowEmptyValue: false
+          example: 1
+        - name: routeId
+          in: path
+          schema:
+            type: integer
+            minimum: 1
+          required: true
+          allowEmptyValue: false
+          example: 1
+      responses:
+        200:
+          description: list of all routes in a trip
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Route'
+
+components:
+  schemas:
+    Trip:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: unique id of the trip for the identifier
+          example: 1
+        name:
+          type: string
+          description: the name of the trip
+          example: London with Bob
+
+    Route:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: unique id for the trip
+          example: 1
+        origin:
+          type: string
+          description: the origin of the routes
+          example: London
+        destination:
+          type: string
+          description: the endpoint of a particular routes
+          example: Manchester
+        by:
+          type: string
+          description: the options of transportation
+          example: Train
+
+  links:
+    GetRoutesByTripId:
+      description: >
+        The `id` value returned in the response can be used as
+        the `tripId` parameter in `GET /trips/{tripId}/routes
+      operationId: getRoutes
+      parameters:
+        userId: '$response.body#/id'
